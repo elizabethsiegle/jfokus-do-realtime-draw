@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Collaborative Drawing powered by Cloudflare</title>
+  <meta charset="UTF-8">
+  <style>
+    canvas {
+      border: 1px solid black;
+      cursor: crosshair;
+    }
+    .controls {
+      margin: 10px 0;
+    }
+    body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            
+            text-align: center;
+            background-color: #FFD1DC; /* Light pink background */
+            margin: 0;
+    padding: 0;
+    height: 100%;
+        }
+        .footer {
+            background-color: #4CAF50; /* New color */
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+       
+    
+                    
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="clearBtn">Clear All</button>
+    <input type="color" id="colorPicker" value="#000000">
+    <select id="brushSize">
+      <option value="2">Small</option>
+      <option value="5">Medium</option>
+      <option value="10">Large</option>
+    </select>
+    <label><input type="checkbox" id="eraser"> Eraser</label>
+  </div>
+  <h1>Collaborative Drawing powered by Cloudflare Durable Objects</h1>
+  <canvas id="canvas" width="800" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const clearBtn = document.getElementById('clearBtn');
+const colorPicker = document.getElementById('colorPicker');
+const brushSize = document.getElementById('brushSize');
+const eraser = document.getElementById('eraser');
+
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let ws;
+
+// Initialize WebSocket connection
+function connect() {
+  ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/draw`);
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    
+    switch (data.type) {
+      case 'draw':
+        drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size);
+        break;
+      case 'clear':
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        break;
+      case 'init':
+        if (data.strokes) {
+          data.strokes.forEach(stroke => {
+            drawLine(stroke.x0, stroke.y0, stroke.x1, stroke.y1, stroke.color, stroke.size);
+          });
+        }
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    setTimeout(connect, 1000);
+  };
+}
+
+function drawLine(x0, y0, x1, y1, color, size) {
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  ctx.lineTo(x1, y1);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+// Start drawing (mouse or touch)
+function startDrawing(e) {
+  e.preventDefault();
+  isDrawing = true;
+  
+  const { x, y } = getPosition(e);
+  lastX = x;
+  lastY = y;
+}
+
+// Draw (mouse or touch)
+function draw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+
+  const { x, y } = getPosition(e);
+  const color = eraser.checked ? '#FFD1DC' : colorPicker.value; // Use pink background color for erasing
+  const size = eraser.checked ? 20 : brushSize.value;
+
+  drawLine(lastX, lastY, x, y, color, size);
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'draw', x0: lastX, y0: lastY, x1: x, y1: y, color, size }));
+  }
+
+  lastX = x;
+  lastY = y;
+}
+
+
+// Stop drawing
+function stopDrawing(e) {
+  e.preventDefault();
+  isDrawing = false;
+}
+
+// Get position from mouse or touch event
+function getPosition(e) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    return {
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top
+    };
+  } else {
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+}
+
+// Clear canvas
+function clearCanvas() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'clear' }));
+  }
+}
+
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseleave', stopDrawing);
+
+// Touch events
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
+
+clearBtn.addEventListener('click', clearCanvas);
+
+connect();
+
+  </script>
+  <footer>
+    made w/ ❤️ in sf🌁 with cloudflare -> <a href="https://github.com/elizabethsiegle/jfokus-do-realtime-draw">code🧑🏻‍💻</a>
+</footer>
+</body>
+</html>
