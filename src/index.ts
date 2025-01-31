@@ -1,18 +1,24 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.json`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { DrawingRoom } from './DrawingRoom';
+export { DrawingRoom as DrawingDO };
+import HTML_CONTENT from "../static/index.html";
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
-	},
-} satisfies ExportedHandler<Env>;
+  async fetch(request: Request, env: Env): Promise<Response> {
+    // Handle requests to /draw
+    if (new URL(request.url).pathname === "/draw") {
+      // Get the drawing room Durable Object
+      const id = env.DRAWING_ROOM.idFromName('default-room');
+      const room = env.DRAWING_ROOM.get(id);
+      return room.fetch(request);
+    }
+
+    // Serve the HTML for all other requests
+    return new Response(HTML_CONTENT, {
+      headers: { "Content-Type": "text/html" }
+    });
+  }
+};
+
+export interface Env {
+  DRAWING_ROOM: DurableObjectNamespace;
+}
