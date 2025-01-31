@@ -27,7 +27,7 @@ State Persistence → If a user disconnects, they can rejoin and see the existin
 2. Clone the Repository
 ```bash
 git clone https://github.com/elizabethsiegle/jfokus-do-realtime-draw.git
-cd jfokus-do-realtime-draw
+cd drawtest
 ```
 3. Configure Durable Objects
 Modify wrangler.json to define the Durable Object binding:
