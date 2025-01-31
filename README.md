@@ -2,18 +2,18 @@
 
 This project is a real-time collaborative drawing application built using Cloudflare Workers and Durable Objects using Cursor. It enables multiple users to draw on a shared canvas simultaneously, with state synchronization across all participants.
 
-Features
-✅ Real-time Collaboration – Users can draw together on the same canvas, with updates reflecting instantly.
-✅ Durable Objects for State Management – Ensures consistent state across users by managing drawing data centrally.
-✅ Cloudflare Workers for Scalability – Serverless backend handles requests efficiently at the edge.
-✅ Low Latency Updates – Fast communication using WebSockets or other real-time mechanisms.
-✅ Persistent Canvas State – Drawings remain even if users disconnect and reconnect.
+#### Features
+- ✅ Real-time Collaboration – Users can draw together on the same canvas, with updates reflecting instantly.
+- ✅ Durable Objects for State Management – Ensures consistent state across users by managing drawing data centrally.
+- ✅ Cloudflare Workers for Scalability – Serverless backend handles requests efficiently at the edge.
+- ✅ Low Latency Updates – Fast communication using WebSockets or other real-time mechanisms.
+- ✅ Persistent Canvas State – Drawings remain even if users disconnect and reconnect.
 
 #### Tech Stack
- 🔥 Cloudflare Workers – Serverless execution environment.
- 🔥 Cloudflare Durable Objects – Manages shared state across multiple users.
- 🔥 WebSockets (or HTTP streaming) – Enables real-time updates.
- 🔥 HTML, CSS, JavaScript – Frontend for drawing interaction.
+ - 🔥 Cloudflare Workers – Serverless execution environment.
+ - 🔥 Cloudflare Durable Objects – Manages shared state across multiple users.
+ - 🔥 WebSockets (or HTTP streaming) – Enables real-time updates.
+ - 🔥 HTML, CSS, JavaScript – Frontend for drawing interaction.
 
 #### How It Works
 User Joins a Session → Each drawing session is assigned to a Durable Object.
