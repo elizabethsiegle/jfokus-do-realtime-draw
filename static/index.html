@@ -117,7 +117,7 @@ function draw(e) {
 
   const { x, y } = getPosition(e);
   const color = eraser.checked ? '#FFD1DC' : colorPicker.value; // Use pink background color for erasing
-  const size = eraser.checked ? 20 : brushSize.value;
+  const size = eraser.checked ? 70 : brushSize.value;
 
   drawLine(lastX, lastY, x, y, color, size);
 

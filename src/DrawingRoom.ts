@@ -55,11 +55,11 @@ export class DrawingRoom implements DurableObject {
               size: data.size
             });
             // Save to durable storage periodically
-            await this.state.storage.put('strokes', this.strokes);
+            await this.state.storage.put('strokes', [...this.strokes]);
             break;
           case 'clear':
             this.strokes = [];
-            await this.state.storage.put('strokes', this.strokes);
+            await this.state.storage.put('strokes', []);
             break;
         }
 
